@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Giuseppe Napoli — Data Scientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e1f3d;          /* oltremare profondo  */
+    --ink-2:#13294e;        /* pannello            */
+    --line:#26406e;         /* linee tenui         */
+    --teal:#34b6a8;         /* accento             */
+    --teal-soft:#7fd4c9;
+    --paper:#eef2f9;        /* testo               */
+    --muted:#9fb1cc;        /* testo secondario    */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:0 18px;
+  }
+  .card{width:100%;max-width:440px;padding:0 0 40px}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;padding:54px 4px 30px;overflow:hidden}
+  .hero svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.55}
+  .hero-inner{position:relative;z-index:1}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--teal-soft);margin-bottom:18px;
+  }
+  h1{
+    font-family:"Space Grotesk",sans-serif;
+    font-weight:700;font-size:42px;line-height:1.02;
+    letter-spacing:-.02em;margin-bottom:14px;
+  }
+  .tagline{color:var(--muted);font-size:14.5px;max-width:34ch}
+  .focus{list-style:none;margin-top:4px}
+  .focus li{
+    position:relative;padding-left:20px;
+    font-size:15.5px;font-weight:500;color:var(--paper);
+    line-height:1.95;letter-spacing:.005em;
+  }
+  .focus li::before{
+    content:"";position:absolute;left:0;top:.85em;
+    width:11px;height:2px;background:var(--teal);border-radius:2px;
+  }
+  .rule{height:2px;width:46px;background:var(--teal);margin:22px 0 0;border-radius:2px}
+
+  /* ---------- ACTIONS ---------- */
+  .actions{display:flex;gap:10px;margin-top:26px}
+  .btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    text-decoration:none;border-radius:13px;padding:14px 12px;
+    font-weight:600;font-size:14.5px;letter-spacing:.01em;
+    transition:transform .12s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:18px;height:18px;flex:none}
+  .btn-primary{background:var(--teal);color:#04221d}
+  .btn-primary:hover{background:var(--teal-soft)}
+  .btn-ghost{background:transparent;color:var(--paper);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--teal)}
+
+  /* ---------- SECTION ---------- */
+  .sec{margin-top:40px}
+  .sec-head{
+    display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  }
+  .sec-head span{
+    font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+    white-space:nowrap;
+  }
+  .sec-head .bar{height:1px;background:var(--line);flex:1}
+
+  .work{
+    display:block;text-decoration:none;color:inherit;
+    background:var(--ink-2);border:1px solid var(--line);
+    border-radius:15px;padding:18px 18px 16px;margin-bottom:12px;
+    transition:border-color .2s ease, transform .12s ease;
+  }
+  .work:hover{border-color:var(--teal)}
+  .work:active{transform:translateY(1px)}
+  .work-top{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal-soft);
+    margin-bottom:9px;
+  }
+  .work-top .arrow{color:var(--muted)}
+  .work h3{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;
+    font-size:16px;line-height:1.28;letter-spacing:-.01em;
+  }
+  .work p{color:var(--muted);font-size:12.5px;margin-top:7px}
+
+  /* ---------- SAVE ---------- */
+  .save{
+    width:100%;margin-top:24px;border:none;cursor:pointer;
+    background:var(--paper);color:var(--ink);
+    border-radius:14px;padding:16px;font-weight:600;font-size:15px;
+    font-family:"IBM Plex Sans",sans-serif;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .12s ease, opacity .2s ease;
+  }
+  .save:hover{opacity:.92}
+  .save:active{transform:translateY(1px)}
+  .save svg{width:18px;height:18px}
+
+  /* ---------- FOOTER ---------- */
+  footer{margin-top:34px;display:flex;align-items:center;gap:12px;color:var(--muted)}
+  .mono-gn{
+    font-family:"Space Grotesk",sans-serif;font-weight:700;
+    font-size:15px;letter-spacing:.04em;
+    border:1px solid var(--line);border-radius:9px;padding:7px 10px;color:var(--paper);
+  }
+  footer p{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em}
+
+  @media (prefers-reduced-motion: reduce){
+    .draw{stroke-dasharray:none !important;stroke-dashoffset:0 !important;animation:none !important}
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+
+    <section class="hero">
+      <svg id="weave" viewBox="0 0 440 320" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="hero-inner">
+        <div class="eyebrow">Data Scientist · Milano</div>
+        <h1>Giuseppe<br>Napoli</h1>
+        <ul class="focus">
+          <li>Interpretable AI</li>
+          <li>Reinforcement Learning</li>
+          <li>Alternative neural networks</li>
+        </ul>
+        <div class="rule"></div>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="tel:+393386262464">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Chiama
+          </a>
+          <a class="btn btn-ghost" href="https://it.linkedin.com/in/giuseppenapoli" target="_blank" rel="noopener">
+            LinkedIn
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-head"><span>Last Works</span><div class="bar"></div></div>
+
+      <a class="work" href="https://www.researchgate.net/publication/403090486_Warm_start_Hybrid_Deep_Reinforcement_Learning_with_Multi-Layer_Perceptrons_and_Kolmogorov-Arnold_Network_for_Multi-Echelon_Inventory_Optimization" target="_blank" rel="noopener">
+        <div class="work-top"><span>Co-supervisor</span><span class="arrow">↗</span></div>
+        <h3>Warm-start Hybrid Deep RL with MLP &amp; Kolmogorov–Arnold Network for Multi-Echelon Inventory Optimization</h3>
+        <p>ResearchGate · Deep Reinforcement Learning · KAN · supply chain</p>
+      </a>
+
+      <a class="work" href="https://www.researchgate.net/publication/385843251_Purchasing_Optimization_in_the_Independent_Automotive_Aftermarket_Sector_the_LKQ_Europe_Case_Study" target="_blank" rel="noopener">
+        <div class="work-top"><span>Final Master's degree thesis</span><span class="arrow">↗</span></div>
+        <h3>Purchasing Optimization in the Independent Automotive Aftermarket — the LKQ Europe Case Study</h3>
+        <p>ResearchGate · procurement analytics · aftermarket</p>
+      </a>
+    </section>
+
+    <button class="save" id="saveBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V3h13l5 5z"/><path d="M16 3v6H8V3M8 21v-6h8v6"/></svg>
+      Salva il contatto
+    </button>
+
+    <footer>
+      <div class="mono-gn">GN</div>
+      <p>giuseppe napoli · milano</p>
+    </footer>
+
+  </main>
+
+<script>
+  /* --- Chebyshev curve weave (firma visiva, coerente col biglietto) --- */
+  (function(){
+    const svg = document.getElementById('weave');
+    const W = 440, H = 320, cx = H/2, amp = H*0.42, N = 180;
+    function T(k,x){let t0=1,t1=x;if(k===0)return 1;if(k===1)return x;
+      for(let i=2;i<=k;i++){[t0,t1]=[t1,2*x*t1-t0];}return t1;}
+    const colors = ['#2b4a82','#1f3a6b','#34b6a8'];
+    let k=0;
+    for(let deg=2; deg<=7; deg++){
+      let d='';
+      for(let i=0;i<=N;i++){
+        const u=-1+2*i/N, px=(i/N)*W, py=cx+amp*T(deg,u);
+        d += (i===0?'M':'L')+px.toFixed(1)+' '+py.toFixed(1)+' ';
+      }
+      const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('d',d);
+      p.setAttribute('fill','none');
+      p.setAttribute('stroke', colors[k%colors.length]);
+      p.setAttribute('stroke-width', deg===4?'1.4':'1');
+      p.setAttribute('class','draw');
+      svg.appendChild(p);
+      const len=p.getTotalLength();
+      p.style.strokeDasharray=len;
+      p.style.strokeDashoffset=len;
+      p.style.animation=`draw 1.6s ${0.12*k}s ease forwards`;
+      k++;
+    }
+    const st=document.createElement('style');
+    st.textContent='@keyframes draw{to{stroke-dashoffset:0}}';
+    document.head.appendChild(st);
+  })();
+
+  /* --- vCard scaricabile (con i 3 URL standard) --- */
+  document.getElementById('saveBtn').addEventListener('click', function(){
+    const v = [
+      'BEGIN:VCARD','VERSION:3.0',
+      'N:Napoli;Giuseppe;;;','FN:Giuseppe Napoli',
+      'TITLE:Data Scientist',
+      'ADR;TYPE=WORK:;;;Milano;;;Italy',
+      'TEL;TYPE=CELL:+393386262464',
+      'URL:https://it.linkedin.com/in/giuseppenapoli',
+      'URL:https://www.researchgate.net/publication/403090486_Warm_start_Hybrid_Deep_Reinforcement_Learning_with_Multi-Layer_Perceptrons_and_Kolmogorov-Arnold_Network_for_Multi-Echelon_Inventory_Optimization',
+      'URL:https://www.researchgate.net/publication/385843251_Purchasing_Optimization_in_the_Independent_Automotive_Aftermarket_Sector_the_LKQ_Europe_Case_Study',
+      'END:VCARD'
+    ].join('\r\n');
+    const blob = new Blob([v], {type:'text/vcard'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'Giuseppe_Napoli.vcf';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  });
+</script>
+</body>
+</html>
