@@ -41,7 +41,7 @@
 
   /* ---------- HERO ---------- */
   .hero{position:relative;padding:54px 4px 30px;overflow:hidden}
-  .hero svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.55}
+  .hero svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.55;pointer-events:none;user-select:none;-webkit-mask-image:linear-gradient(to bottom,transparent 0,transparent 84px,#000 150px);mask-image:linear-gradient(to bottom,transparent 0,transparent 84px,#000 150px)}
   .hero-inner{position:relative;z-index:1}
   .eyebrow{
     font-family:"IBM Plex Mono",monospace;
@@ -80,6 +80,8 @@
   .btn-primary:hover{background:var(--teal-soft)}
   .btn-ghost{background:transparent;color:var(--paper);border:1px solid var(--line)}
   .btn-ghost:hover{border-color:var(--teal)}
+  .btn-linkedin{background:#1c4fb3;color:#fff;border:1px solid #1c4fb3}
+  .btn-linkedin:hover{background:#2a5fd0;border-color:#2a5fd0}
 
   /* ---------- SECTION ---------- */
   .sec{margin-top:40px}
@@ -128,7 +130,7 @@
 
   /* ---------- SAVE ---------- */
   .save{
-    width:100%;margin-top:24px;border:none;cursor:pointer;
+    width:100%;margin-top:10px;border:none;cursor:pointer;
     background:var(--paper);color:var(--ink);
     border-radius:14px;padding:16px;font-weight:600;font-size:15px;
     font-family:"IBM Plex Sans",sans-serif;
@@ -254,10 +256,16 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Call
           </a>
-          <a class="btn btn-ghost" href="https://it.linkedin.com/in/giuseppenapoli" target="_blank" rel="noopener">
+          <a class="btn btn-linkedin" href="https://it.linkedin.com/in/giuseppenapoli" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .78 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .78 23.2 0 22.22 0z"/></svg>
             LinkedIn
           </a>
         </div>
+
+        <button class="save" id="saveBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V3h13l5 5z"/><path d="M16 3v6H8V3M8 21v-6h8v6"/></svg>
+          save the contact
+        </button>
       </div>
     </section>
 
@@ -300,11 +308,6 @@
         </button>
       </div>
     </section>
-
-    <button class="save" id="saveBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V3h13l5 5z"/><path d="M16 3v6H8V3M8 21v-6h8v6"/></svg>
-      save the contact
-    </button>
 
       <section class="arcade" aria-label="Blackboard Arcade Flow">
         <div class="hud"><span>Blackboard Arcade Flow</span><span class="blink">Auto</span></div>
@@ -592,11 +595,11 @@ g = vmap(grad(loss), in_dims=(None, 0, 0))</code></pre>
       'BEGIN:VCARD','VERSION:3.0',
       'N:Napoli;Giuseppe;;;','FN:Giuseppe Napoli',
       'TITLE:Data Scientist',
-      'ADR;TYPE=WORK:;;;Milano;;;Italy',
       'TEL;TYPE=CELL:+393386262464',
-      'URL:https://it.linkedin.com/in/giuseppenapoli',
-      'URL:https://www.researchgate.net/publication/403090486_Warm_start_Hybrid_Deep_Reinforcement_Learning_with_Multi-Layer_Perceptrons_and_Kolmogorov-Arnold_Network_for_Multi-Echelon_Inventory_Optimization',
-      'URL:https://www.researchgate.net/publication/385843251_Purchasing_Optimization_in_the_Independent_Automotive_Aftermarket_Sector_the_LKQ_Europe_Case_Study',
+      'EMAIL;TYPE=WORK,INTERNET:g.napoli11@campus.unimib.it',
+      'EMAIL;TYPE=HOME,INTERNET:giuseppenapoli@hotmail.com',
+      'ADR;TYPE=WORK:;;;Milano;;;Italia',
+      'URL:https://gn84.github.io',
       'END:VCARD'
     ].join('\r\n');
     const blob = new Blob([v], {type:'text/vcard'});
