@@ -343,6 +343,16 @@
 
       <div class="work">
         <div class="work-top"><span>Essay</span><span class="arrow">&#x2193;</span></div>
+        <h3>The Dwarf Star SaaS: sovereign AI on a box you own</h3>
+        <p>A whole AI SaaS on one NVIDIA DGX Spark: antirez's DwarfStar (ds4) runs the language model, reinforcement learning agents in JAX make the decisions, and the data stays on a European server. The case for owning the box, and the honest price of doing it.</p>
+        <button class="read-btn" type="button" onclick="openDwarf()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Read
+        </button>
+      </div>
+
+      <div class="work">
+        <div class="work-top"><span>Essay</span><span class="arrow">&#x2193;</span></div>
         <h3>From Sisyphus to Super Sisyphus</h3>
         <p>Some people confuse movement with progress. AI agents will not fix that: they just give you a faster Sisyphus. On the confusion between classical AI and LLMs, and why effectiveness beats efficiency every time.</p>
         <button class="read-btn" type="button" onclick="openSisifo()">
@@ -1159,6 +1169,147 @@ causal_eps = backdoor_ate(demand_scm, 0.0, delta, z_samples) / (delta * d_base)
     </div>
   </div>
 
+  <!-- ======= POST: Dwarf Star SaaS ======= -->
+  <div id="postDwarf" class="post-view" hidden>
+    <div class="col">
+      <div class="top"><a href="#" data-back>&#x2190; Giuseppe Napoli &middot; Discussions</a></div>
+      <article>
+        <h1><a href="#dwarf">The Dwarf Star SaaS: sovereign AI on a box you own</a></h1>
+        <p class="meta">25 Nov 2026 &middot; Giuseppe Napoli</p>
+
+        <p>Most AI products sold as "software as a service" today are three rentals stacked on top of each other. You rent the model from an API provider. You rent the compute from a hyperscaler. And, often without noticing, you rent the jurisdiction your customers' data lives under. Every layer can change its price, its terms or its rules without asking you.</p>
+
+        <p>I think a small, serious B2B SaaS no longer needs any of those three rentals. In 2026 the whole stack fits on one machine you own, plus one server in Europe that you choose. This essay is the case for doing exactly that.</p>
+
+        <h2>The ingredients</h2>
+
+        <p><strong>A box.</strong> An NVIDIA DGX Spark: a desktop machine built around the GB10 chip with 128&nbsp;GB of memory shared by CPU and GPU. It is not a datacenter. It sits on a desk, and that is the point.</p>
+
+        <p><strong>A dwarf star.</strong> <a href="https://github.com/antirez/ds4" target="_blank" rel="noopener">DwarfStar (ds4)</a> is the inference engine Salvatore Sanfilippo, antirez of Redis fame, has been building in plain C. Its stated goal is to be the best way to run a few excellent open-weight models on hardware people can actually own. It is deliberately narrow: it is not a general runner but an engine specialized for a handful of models (DeepSeek V4 Flash first, plus GLM and Qwen variants), and the DGX Spark is its main CUDA target. It ships an HTTP server that speaks OpenAI-style and Anthropic-style APIs, so the rest of your software does not need to know the model lives under your desk.</p>
+
+        <p>The project's own recorded benchmarks for DeepSeek V4 Flash Q2 on a single 128&nbsp;GB Spark report roughly 820&ndash;870 tokens/s of prefill and 14&ndash;18 tokens/s of generation, depending on context length. Those are the author's measurements, on a codebase that is explicitly labelled beta and changes fast, so treat them as an order of magnitude, not a promise.</p>
+
+        <p><strong>A European server.</strong> The data (customer records, transactions, history) lives on a server hosted in the EU by a provider you pick, ideally one that is European-owned. The Spark reaches it through an encrypted tunnel. No prompt, no record and no model output ever passes through a third-party AI API.</p>
+
+        <p><strong>JAX.</strong> The decision layer is made of reinforcement learning agents written in <a href="#jax">JAX</a>, trained and served on the same GPU that runs the language model.</p>
+
+        <h2>The LLM talks, the agent decides</h2>
+
+        <p>In <a href="#sisifo">From Sisyphus to Super Sisyphus</a> I argued that LLMs reorganize and accelerate what already exists, while classical AI, built on optimization and learned decision rules, produces new knowledge. The architecture follows directly from that distinction.</p>
+
+<pre><code>user
+ │
+ ▼
+ds4-server   LLM on the Spark:
+ │           reads the request,
+ │           calls a tool
+ ▼
+JAX policy   RL agent on the Spark:
+ │           computes the decision
+ ▼
+EU server    data, history,
+ │           audit log
+ ▼
+ds4-server   explains the decision
+             back to the user</code></pre>
+
+        <p>The language model is the interface. It reads the question ("how much should store 12 order next week?"), calls the right tool, and explains the answer in plain language. It never invents the number. The number comes from a policy that was trained against the customer's own demand data and can be tested, versioned and audited like any other piece of software.</p>
+
+        <p>This split also solves the throughput problem honestly. Generation at 15 tokens/s is slow for a chatbot that writes essays. It is plenty for a model whose job is to emit a short tool call and a three-sentence explanation. The heavy computation happens in the RL policy, which is a few matrix multiplications.</p>
+
+        <h2>Why JAX fits a single box</h2>
+
+        <p>The reason JAX matters here is <code>vmap</code> and <code>scan</code>: you write the simulation of one store for one year, and JAX turns it into thousands of parallel simulations compiled into a single GPU program. On one machine, that is the difference between training overnight and training over lunch.</p>
+
+        <p>A deliberately minimal example: a REINFORCE agent learns the order-up-to level of an inventory policy, with Poisson demand, a holding cost $h$ and a backorder cost $b$, over 4,096 simulated stores in parallel.</p>
+
+<pre><code>import jax, jax.numpy as jnp, optax
+
+H, B, T = 1.0, 9.0, 52            # holding cost, backorder cost, weeks
+
+def episode(theta, key):
+    # one store, one year: Gaussian policy over the order-up-to level S
+    def week(inv, k):
+        k_a, k_d = jax.random.split(k)
+        S = jax.lax.stop_gradient(theta[0] + jnp.exp(theta[1]) * jax.random.normal(k_a))
+        order = jnp.maximum(S - inv, 0.0)
+        demand = jax.random.poisson(k_d, 20.0)
+        inv = inv + order - demand
+        cost = H * jnp.maximum(inv, 0) + B * jnp.maximum(-inv, 0)
+        logp = jax.scipy.stats.norm.logpdf(S, theta[0], jnp.exp(theta[1]))
+        return inv, (cost, logp)
+    _, (cost, logp) = jax.lax.scan(week, 0.0, jax.random.split(key, T))
+    return cost.sum(), logp.sum()
+
+def loss(theta, key, n_envs=4096):
+    cost, logp = jax.vmap(episode, (None, 0))(theta, jax.random.split(key, n_envs))
+    adv = jax.lax.stop_gradient(cost - cost.mean())
+    return (adv * logp).mean(), cost.mean()     # REINFORCE with a baseline
+
+opt = optax.adam(0.5)
+
+@jax.jit
+def update(theta, state, key):
+    (_, cost), g = jax.value_and_grad(loss, has_aux=True)(theta, key)
+    upd, state = opt.update(g, state)
+    return optax.apply_updates(theta, upd), state, cost
+
+theta = jnp.array([5.0, 1.0]); state = opt.init(theta)
+for k in jax.random.split(jax.random.PRNGKey(0), 300):
+    theta, state, cost = update(theta, state, k)</code></pre>
+
+        <p>This toy has a closed-form answer, which is why I chose it: the optimal level is the newsvendor critical quantile of the demand distribution $F$, here $D \sim \text{Poisson}(20)$:</p>
+
+        $$S^* = F^{-1}\!\left(\frac{b}{b+h}\right) = F^{-1}(0.9) = 26$$
+
+        <p>The agent lands at about 25.8. That is the whole point of the example: before you trust a learned policy on problems with no closed form (multi-echelon networks, lead times, correlated demand), you check that it rediscovers the answers you already know. In production the same pattern scales up to real policies, such as the warm-start hybrid MLP/KAN agents for multi-echelon inventory that I co-supervised, but the shape of the code does not change.</p>
+
+        <h2>Sovereignty is a feature, not a slogan</h2>
+
+        <p>For a European customer, "where does my data go?" is not a philosophical question. It is a procurement checklist item under the GDPR. A provider headquartered outside the EU can be subject to foreign disclosure laws, such as the US CLOUD Act, even when the bytes are physically stored in Frankfurt or Milan. With this architecture the answer fits in one sentence: the data sits on a European server, the model runs on a machine we own, and nothing is sent to anyone else.</p>
+
+        <p>There is a second kind of sovereignty that matters just as much: over the model itself. An API model can be deprecated, re-tuned or re-priced under your product. Open weights on your own disk behave the same way next year as they do today, unless <em>you</em> decide to change them.</p>
+
+        <h2>The honest price</h2>
+
+        <p>A manifesto that hides its costs is marketing. These are the real ones.</p>
+        <ul>
+          <li><strong>One box is one point of failure.</strong> A serious service needs a second Spark (ds4 can even split a model across two of them over a direct network link) or at least a tested plan B.</li>
+          <li><strong>Concurrency is limited.</strong> This is a SaaS for tens of customers with predictable workloads, not for millions of anonymous users. ds4 supports batched sessions, but a single desk machine is not a datacenter.</li>
+          <li><strong>You are the operations team.</strong> Updates, monitoring, backups of the EU server, security of the tunnel: all yours.</li>
+          <li><strong>The engine is young.</strong> ds4 is labelled beta by its own author. Pin versions, keep the evaluation suite running, and upgrade deliberately.</li>
+        </ul>
+
+        <p>None of these costs is hidden, and all of them are under your control. That is the difference with the three rentals: their costs are also real, but they are decided by someone else.</p>
+
+        <h2>Small is the new sovereign</h2>
+
+        <p>A dwarf star is small, dense and burns for a very long time. That is what I want from the infrastructure of a small AI company: a box I own, data in a jurisdiction my customers trust, a language model that talks, and decision agents that actually decide. Everything else is renting someone else's boulder.</p>
+
+        <p class="meta">Figures on ds4 come from the project's own README and docs as of November 2026; the software changes quickly, so check the <a href="https://github.com/antirez/ds4" target="_blank" rel="noopener">repository</a> for current numbers.</p>
+      </article>
+
+  <div class="rx-wrap">
+    <div class="rx-btns">
+      <button class="rx-btn" id="like-dwarf" onclick="rxToggle('dwarf','like')"><span class="rx-icon">&#x1F44D;</span><span class="rx-count" id="lc-dwarf">0</span></button>
+      <button class="rx-btn" id="dislike-dwarf" onclick="rxToggle('dwarf','dislike')"><span class="rx-icon">&#x1F44E;</span><span class="rx-count" id="dc-dwarf">0</span></button>
+    </div>
+    <div class="cmt-block">
+      <h4>Leave a comment</h4>
+      <input  id="cn-dwarf" class="cmt-field" type="text"  placeholder="Name (optional)">
+      <input  id="ce-dwarf" class="cmt-field" type="email" placeholder="Email *" oninput="rxEmailCheck('dwarf')">
+      <textarea id="ct-dwarf" class="cmt-field" rows="4" placeholder="Your comment…"></textarea>
+      <button id="cs-dwarf" class="cmt-submit" disabled onclick="rxSubmit('dwarf','The Dwarf Star SaaS')">Send</button>
+      <p class="cmt-note">Your email is required but will not be shown publicly.</p>
+      <p id="cok-dwarf" class="cmt-ok">&#x2713; Thanks for your comment!</p>
+      <p id="cerr-dwarf" class="cmt-err">Send failed, try again or email g.napoli11@campus.unimib.it</p>
+    </div>
+  </div>
+
+      <footer><p><a href="#" data-back>&#x2190; back to the card</a></p></footer>
+    </div>
+  </div>
+
 <script>
   /* --- Chebyshev curve weave (firma visiva, coerente col biglietto) --- */
   (function(){
@@ -1246,12 +1397,15 @@ causal_eps = backdoor_ate(demand_scm, 0.0, delta, z_samples) / (delta * d_base)
     var sisifo = document.getElementById('postSisifo');
     causal.hidden = (h !== '#causal');
     sisifo.hidden = (h !== '#sisifo');
+    var dwarf = document.getElementById('postDwarf');
+    dwarf.hidden  = (h !== '#dwarf');
     if (h === '#read')   { renderMath('postView');   wass.scrollTop = 0; }
     if (h === '#jax')    { jax.scrollTop = 0; }
     if (h === '#biz')    { biz.scrollTop = 0; }
     if (h === '#jko')    { renderMath('postJko');    jko.scrollTop = 0; }
     if (h === '#causal') { renderMath('postCausal'); causal.scrollTop = 0; }
     if (h === '#sisifo') { sisifo.scrollTop = 0; }
+    if (h === '#dwarf')  { renderMath('postDwarf');  dwarf.scrollTop = 0; }
     window.scrollTo(0, 0);
   }
   function openPost()  { location.hash = 'read'; }
@@ -1260,6 +1414,7 @@ causal_eps = backdoor_ate(demand_scm, 0.0, delta, z_samples) / (delta * d_base)
   function openJko()   { location.hash = 'jko'; }
   function openCausal(){ location.hash = 'causal'; }
   function openSisifo(){ location.hash = 'sisifo'; }
+  function openDwarf() { location.hash = 'dwarf'; }
   window.addEventListener('hashchange', route);
   window.addEventListener('DOMContentLoaded', route);
   document.querySelectorAll('[data-back]').forEach(function(el){
@@ -1315,7 +1470,7 @@ causal_eps = backdoor_ate(demand_scm, 0.0, delta, z_samples) / (delta * d_base)
     }catch(e){document.getElementById('cerr-'+pid).className='cmt-err show';}
     document.getElementById('cs-'+pid).disabled=false;
   }
-  ['wasserstein','jax','biz','jko','causal','sisifo'].forEach(rxLoad);
+  ['wasserstein','jax','biz','jko','causal','sisifo','dwarf'].forEach(rxLoad);
 </script>
 </body>
 </html>
